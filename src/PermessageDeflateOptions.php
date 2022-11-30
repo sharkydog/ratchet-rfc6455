@@ -128,4 +128,73 @@ final class PermessageDeflateOptions
 
         return false;
     }
+
+    public static function fromHeader($header) {
+        $deflate = static::createDisabled();
+
+        if(empty($header=array_filter(array_map('trim',explode(',',$header))))) {
+            return $deflate;
+        }
+
+        foreach($header as $ext) {
+            if(strpos($ext=strtolower($ext),'permessage-deflate')!==0) {
+                continue;
+            }
+            $deflate = static::createEnabled();
+            break;
+        }
+
+        if(!$deflate->isEnabled()) {
+            return $deflate;
+        }
+
+        // 19 = strlen('permessage-deflate;')
+        $ext = array_filter(array_map('trim',explode(';',substr($ext,19))));
+
+        // ['a','b=','c=cc'] -> ['a'=>true, 'b'=>true, 'c'=>'cc']
+        $k=[];
+        array_walk($ext, function(&$v) use(&$k) {
+            $o = array_filter(array_map('trim',explode('=',$v,2)));
+            $k[] = $o[0];
+            $v = !empty($o[1]) ? $o[1] : true;
+        });
+        $ext = array_combine($k,$ext);
+
+        if(isset($ext['client_no_context_takeover'])) {
+            $deflate = $deflate->withClientNoContextTakeover();
+        }
+        if(isset($ext['server_no_context_takeover'])) {
+            $deflate = $deflate->withServerNoContextTakeover();
+        }
+        if(!empty($ext['client_max_window_bits'])) {
+            $deflate = $deflate->withClientMaxWindowBits($ext['client_max_window_bits']);
+        }
+        if(!empty($ext['server_max_window_bits'])) {
+            $deflate = $deflate->withServerMaxWindowBits($ext['server_max_window_bits']);
+        }
+
+        return $deflate;
+    }
+    
+    public function renderHeader() {
+        if(!$this->isEnabled()) return '';
+
+        $header  = 'permessage-deflate';
+
+        if(($b=$this->getClientMaxWindowBits()) != 15) {
+            $header .= '; client_max_window_bits='.$b;
+        }
+        if(($b=$this->getServerMaxWindowBits()) != 15) {
+            $header .= '; server_max_window_bits='.$b;
+        }
+
+        if($this->getClientNoContextTakeover()) {
+            $header .= '; client_no_context_takeover';
+        }
+        if($this->getServerNoContextTakeover()) {
+            $header .= '; server_no_context_takeover';
+        }
+
+        return $header;
+    }
 }
