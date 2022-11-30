@@ -1,7 +1,19 @@
 # RFC6455 - The WebSocket Protocol
 
-[![Build Status](https://github.com/ratchetphp/RFC6455/workflows/CI/badge.svg)](https://github.com/ratchetphp/RFC6455/actions)
-[![Autobahn Testsuite](https://img.shields.io/badge/Autobahn-passing-brightgreen.svg)](http://socketo.me/reports/rfc-server/index.html)
+## This is a fork of [ratchet/rfc6455](https://github.com/ratchetphp/RFC6455)
+Removed all from Ratchet\RFC6455\Handshake, except Ratchet\RFC6455\Handshake\PermessageDeflateOptions
+which is required in Ratchet\RFC6455\Messaging\MessageBuffer.
+
+The PermessageDeflateOptions class will be loaded with a classmap keeping its namespace,
+so I don't need to modify MessageBuffer to merge it without conflicts.
+
+The reason for this is to not pull guzzle and psr interfaces, as they are used only for the handshake,
+which can be simplified and minified, skipping some more or less irrelevant checks these days.
+The handshake (connection upgrade) has to be done separately.
+
+If you don't mind guzzle psr7, just use the original repo.
+
+### Original readme follows
 
 This library a protocol handler for the RFC6455 specification.
 It contains components for both server and client side handshake and messaging protocol negotation.
