@@ -19,10 +19,7 @@
     "autoload": {
         "psr-4": {
             "Ratchet\\RFC6455\\": "src"
-        },
-        "classmap": [
-        	"src/PermessageDeflateOptions.php"
-        ]
+        }
     },
     "require": {
         "php": ">=5.4.2"
