@@ -4,9 +4,6 @@
 Removed all from Ratchet\RFC6455\Handshake, except Ratchet\RFC6455\Handshake\PermessageDeflateOptions
 which is required in Ratchet\RFC6455\Messaging\MessageBuffer.
 
-The PermessageDeflateOptions class will be loaded with a classmap keeping its namespace,
-so I don't need to modify MessageBuffer to merge it without conflicts.
-
 The reason for this is to not pull guzzle and psr interfaces, as they are used only for the handshake,
 which can be simplified and minified, skipping some more or less irrelevant checks these days.
 The handshake (connection upgrade) has to be done separately.
