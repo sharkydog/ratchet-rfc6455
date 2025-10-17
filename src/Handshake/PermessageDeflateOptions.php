@@ -4,21 +4,21 @@ namespace Ratchet\RFC6455\Handshake;
 
 final class PermessageDeflateOptions
 {
-    const MAX_WINDOW_BITS = 15;
-    /* this is a private instead of const for 5.4 compatibility */
-    private static $VALID_BITS = ['8', '9', '10', '11', '12', '13', '14', '15'];
+    public const MAX_WINDOW_BITS = 15;
 
-    private $deflateEnabled = false;
+    private const VALID_BITS = [8, 9, 10, 11, 12, 13, 14, 15];
 
-    private $server_no_context_takeover;
-    private $client_no_context_takeover;
-    private $server_max_window_bits;
-    private $client_max_window_bits;
+    private bool $deflateEnabled = false;
+
+    private ?bool $server_no_context_takeover = null;
+    private ?bool $client_no_context_takeover = null;
+    private ?int $server_max_window_bits = null;
+    private ?int $client_max_window_bits = null;
 
     private function __construct() { }
 
     public static function createEnabled() {
-        $new                             = new static();
+        $new                             = new self();
         $new->deflateEnabled             = true;
         $new->client_max_window_bits     = self::MAX_WINDOW_BITS;
         $new->client_no_context_takeover = false;
@@ -29,35 +29,35 @@ final class PermessageDeflateOptions
     }
 
     public static function createDisabled() {
-        return new static();
+        return new self();
     }
 
-    public function withClientNoContextTakeover() {
+    public function withClientNoContextTakeover(): self {
         $new = clone $this;
         $new->client_no_context_takeover = true;
         return $new;
     }
 
-    public function withoutClientNoContextTakeover() {
+    public function withoutClientNoContextTakeover(): self {
         $new = clone $this;
         $new->client_no_context_takeover = false;
         return $new;
     }
 
-    public function withServerNoContextTakeover() {
+    public function withServerNoContextTakeover(): self {
         $new = clone $this;
         $new->server_no_context_takeover = true;
         return $new;
     }
 
-    public function withoutServerNoContextTakeover() {
+    public function withoutServerNoContextTakeover(): self {
         $new = clone $this;
         $new->server_no_context_takeover = false;
         return $new;
     }
 
-    public function withServerMaxWindowBits($bits = self::MAX_WINDOW_BITS) {
-        if (!in_array($bits, self::$VALID_BITS)) {
+    public function withServerMaxWindowBits(int $bits = self::MAX_WINDOW_BITS): self {
+        if (!in_array($bits, self::VALID_BITS)) {
             throw new \Exception('server_max_window_bits must have a value between 8 and 15.');
         }
         $new = clone $this;
@@ -65,8 +65,8 @@ final class PermessageDeflateOptions
         return $new;
     }
 
-    public function withClientMaxWindowBits($bits = self::MAX_WINDOW_BITS) {
-        if (!in_array($bits, self::$VALID_BITS)) {
+    public function withClientMaxWindowBits(int $bits = self::MAX_WINDOW_BITS): self {
+        if (!in_array($bits, self::VALID_BITS)) {
             throw new \Exception('client_max_window_bits must have a value between 8 and 15.');
         }
         $new = clone $this;
@@ -75,33 +75,33 @@ final class PermessageDeflateOptions
     }
 
     /**
-     * @return mixed
+     * @return bool|null
      */
-    public function getServerNoContextTakeover()
+    public function getServerNoContextTakeover(): ?bool
     {
         return $this->server_no_context_takeover;
     }
 
     /**
-     * @return mixed
+     * @return bool|null
      */
-    public function getClientNoContextTakeover()
+    public function getClientNoContextTakeover(): ?bool
     {
         return $this->client_no_context_takeover;
     }
 
     /**
-     * @return mixed
+     * @return int|null
      */
-    public function getServerMaxWindowBits()
+    public function getServerMaxWindowBits(): ?int
     {
         return $this->server_max_window_bits;
     }
 
     /**
-     * @return mixed
+     * @return int|null
      */
-    public function getClientMaxWindowBits()
+    public function getClientMaxWindowBits(): ?int
     {
         return $this->client_max_window_bits;
     }
@@ -109,12 +109,12 @@ final class PermessageDeflateOptions
     /**
      * @return bool
      */
-    public function isEnabled()
+    public function isEnabled(): bool
     {
         return $this->deflateEnabled;
     }
 
-    public static function permessageDeflateSupported($version = PHP_VERSION) {
+    public static function permessageDeflateSupported(string $version = PHP_VERSION): bool {
         if (!function_exists('deflate_init')) {
             return false;
         }
@@ -129,8 +129,8 @@ final class PermessageDeflateOptions
         return false;
     }
 
-    public static function fromHeader($header) {
-        $deflate = static::createDisabled();
+    public static function fromHeader($header): self {
+        $deflate = self::createDisabled();
 
         if(empty($header=array_filter(array_map('trim',explode(',',$header))))) {
             return $deflate;
@@ -176,7 +176,7 @@ final class PermessageDeflateOptions
         return $deflate;
     }
     
-    public function renderHeader() {
+    public function renderHeader(): string {
         if(!$this->isEnabled()) return '';
 
         $header  = 'permessage-deflate';

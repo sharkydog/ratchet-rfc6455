@@ -22,7 +22,7 @@
         }
     },
     "require": {
-        "php": ">=5.4.2"
+        "php": ">=7.4"
     },
     "conflict": {
         "ratchet/rfc6455": "*"
